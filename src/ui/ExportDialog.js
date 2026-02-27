@@ -5,12 +5,12 @@ import { PAPER_SIZES } from '../core/constants.js';
 import { exportCollage } from '../rendering/ExportRenderer.js';
 
 export function createExportDialog() {
-  let format = 'png';
+  let format = 'pdf';
   let quality = 0.92;
 
   // Format toggle
   const pngBtn = h('button', {
-    class: 'sidebar-btn active',
+    class: 'sidebar-btn',
     onClick: () => {
       format = 'png';
       pngBtn.classList.add('active');
@@ -32,7 +32,7 @@ export function createExportDialog() {
   }, 'JPEG');
 
   const pdfBtn = h('button', {
-    class: 'sidebar-btn',
+    class: 'sidebar-btn active',
     onClick: () => {
       format = 'pdf';
       pdfBtn.classList.add('active');

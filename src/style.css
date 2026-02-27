@@ -838,3 +838,142 @@ input[type="color"]::-webkit-color-swatch {
   background: #1d4ed8;
   border-color: #1d4ed8;
 }
+
+/* ============================================
+   Sidebar toggle (hidden on desktop)
+   ============================================ */
+.sidebar-toggle {
+  display: none;
+}
+
+/* ============================================
+   Sidebar scrim (mobile slide-over backdrop)
+   ============================================ */
+.sidebar-scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.sidebar-scrim.visible {
+  opacity: 1;
+}
+
+/* ============================================
+   Mobile / Responsive
+   ============================================ */
+@media (max-width: 768px) {
+  :root {
+    --toolbar-height: 48px;
+    --photo-strip-height: 80px;
+  }
+
+  /* --- Sidebar toggle visible --- */
+  .sidebar-toggle {
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    flex-shrink: 0;
+  }
+
+  /* --- Sidebar → slide-over panel --- */
+  .sidebar {
+    position: fixed;
+    top: var(--toolbar-height);
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 250ms ease;
+    box-shadow: none;
+  }
+
+  .sidebar.sidebar-visible {
+    transform: translateX(0);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.15);
+  }
+
+  /* --- Scrim visible on mobile --- */
+  .sidebar-scrim {
+    display: block;
+    pointer-events: none;
+  }
+
+  .sidebar-scrim.visible {
+    pointer-events: auto;
+  }
+
+  /* --- Toolbar: compact --- */
+  .toolbar {
+    padding: 0 8px;
+  }
+
+  .toolbar-logo {
+    font-size: 14px;
+    margin-right: 8px;
+  }
+
+  /* Collapse button text, keep SVG icons */
+  .toolbar .btn:not(.btn-icon):not(.sidebar-toggle) {
+    font-size: 0;
+    padding: 8px;
+    gap: 0;
+  }
+
+  .toolbar .btn:not(.btn-icon):not(.sidebar-toggle) svg {
+    font-size: initial;
+  }
+
+  /* --- Canvas area: reduce padding --- */
+  .canvas-area {
+    padding: 8px;
+  }
+
+  /* --- Photo strip: smaller thumbs, always show remove --- */
+  .photo-strip {
+    padding: 0 8px;
+    gap: 6px;
+  }
+
+  .photo-strip-thumb {
+    width: 56px;
+    height: 56px;
+  }
+
+  .photo-strip-add {
+    width: 56px;
+    height: 56px;
+  }
+
+  .photo-strip-remove {
+    opacity: 1;
+  }
+
+  /* --- Slider thumbs: bigger for touch --- */
+  input[type="range"]::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* --- Buttons: minimum touch target --- */
+  .btn {
+    min-height: 40px;
+  }
+
+  /* --- Modals: wider, less padding --- */
+  .modal-card {
+    width: 95vw;
+    padding: 16px;
+  }
+
+  .photo-editor-panel {
+    width: 95vw;
+    padding: 16px;
+  }
+}

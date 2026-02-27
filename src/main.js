@@ -39,12 +39,27 @@ function init() {
   main.appendChild(sidebar);
   main.appendChild(canvasArea);
 
+  // Sidebar scrim for mobile slide-over
+  const scrim = document.createElement('div');
+  scrim.className = 'sidebar-scrim';
+  scrim.addEventListener('click', () => {
+    sidebar.classList.remove('sidebar-visible');
+    scrim.classList.remove('visible');
+  });
+
   app.appendChild(toolbar);
   app.appendChild(main);
+  app.appendChild(scrim);
   app.appendChild(photoStrip);
   app.appendChild(dropZone);
   app.appendChild(exportOverlay);
   app.appendChild(photoEditor);
+
+  // Toggle sidebar on mobile
+  EventBus.on('toggleSidebar', () => {
+    sidebar.classList.toggle('sidebar-visible');
+    scrim.classList.toggle('visible');
+  });
 
   // Compute initial layout
   const cells = computeLayout(Store.getState());

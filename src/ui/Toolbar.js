@@ -30,8 +30,15 @@ export function createToolbar() {
     ' Export'
   );
 
+  const sidebarToggle = h('button', {
+    class: 'btn btn-icon sidebar-toggle',
+    title: 'Toggle sidebar',
+    onClick: () => EventBus.emit('toggleSidebar'),
+  }, menuSvg());
+
   const toolbar = h('header', { class: 'toolbar' },
     h('div', { class: 'toolbar-left' },
+      sidebarToggle,
       h('span', { class: 'toolbar-logo' }, 'Collage Maker'),
       addPhotosBtn,
     ),
@@ -45,6 +52,24 @@ export function createToolbar() {
   );
 
   return { toolbar, undoBtn, redoBtn };
+}
+
+function menuSvg() {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('width', '20');
+  svg.setAttribute('height', '20');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  for (const d of ['M3 12h18', 'M3 6h18', 'M3 18h18']) {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    svg.appendChild(path);
+  }
+  return svg;
 }
 
 function svgIcon(name, size = 20) {

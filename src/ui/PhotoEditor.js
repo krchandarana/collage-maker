@@ -203,6 +203,37 @@ export function createPhotoEditor() {
     }
   });
 
+  // --- Preview touch pan (mobile) ---
+  previewCanvas.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    e.preventDefault();
+    isPanning = true;
+    const t = e.touches[0];
+    panStartX = t.clientX;
+    panStartY = t.clientY;
+    const photo = getSelectedPhoto();
+    if (photo) {
+      panPhotoStartX = photo.cropOffsetX || 0;
+      panPhotoStartY = photo.cropOffsetY || 0;
+    }
+  }, { passive: false });
+
+  previewCanvas.addEventListener('touchmove', (e) => {
+    if (!isPanning || e.touches.length !== 1) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    const dx = t.clientX - panStartX;
+    const dy = t.clientY - panStartY;
+    const sensitivity = 0.005;
+    const offsetX = Math.max(-1, Math.min(1, panPhotoStartX - dx * sensitivity));
+    const offsetY = Math.max(-1, Math.min(1, panPhotoStartY - dy * sensitivity));
+    updatePhoto({ cropOffsetX: offsetX, cropOffsetY: offsetY });
+  }, { passive: false });
+
+  previewCanvas.addEventListener('touchend', () => {
+    isPanning = false;
+  }, { passive: false });
+
   // =============================================
   // Crop mode
   // =============================================
@@ -342,6 +373,70 @@ export function createPhotoEditor() {
       cropDragType = null;
     }
   });
+
+  // --- Crop touch events (mobile) ---
+  function getTouchCropCoords(t) {
+    const rect = cropCanvas.getBoundingClientRect();
+    return {
+      x: (t.clientX - rect.left) / cropImgW,
+      y: (t.clientY - rect.top) / cropImgH,
+    };
+  }
+
+  cropCanvas.addEventListener('touchstart', (e) => {
+    if (!isCropMode || e.touches.length !== 1) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    const { x, y } = getTouchCropCoords(t);
+    const hit = hitTestCropHandle(x, y);
+    if (hit) {
+      cropDragType = hit;
+      cropDragStart = { mx: x, my: y, rect: { ...cropRect } };
+    }
+  }, { passive: false });
+
+  cropCanvas.addEventListener('touchmove', (e) => {
+    if (!cropDragType || !isCropMode || e.touches.length !== 1) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    const { x, y } = getTouchCropCoords(t);
+    const dx = x - cropDragStart.mx;
+    const dy = y - cropDragStart.my;
+    const r = cropDragStart.rect;
+
+    if (cropDragType === 'move') {
+      let nx = r.x + dx;
+      let ny = r.y + dy;
+      nx = Math.max(0, Math.min(1 - r.w, nx));
+      ny = Math.max(0, Math.min(1 - r.h, ny));
+      cropRect = { x: nx, y: ny, w: r.w, h: r.h };
+    } else {
+      let rx = r.x, ry = r.y, rw = r.w, rh = r.h;
+      const MIN = 0.05;
+      if (cropDragType.includes('w')) {
+        const newX = Math.max(0, Math.min(rx + rw - MIN, rx + dx));
+        rw = rx + rw - newX;
+        rx = newX;
+      }
+      if (cropDragType[1] === 'e') {
+        rw = Math.max(MIN, Math.min(1 - rx, rw + dx));
+      }
+      if (cropDragType[0] === 'n') {
+        const newY = Math.max(0, Math.min(ry + rh - MIN, ry + dy));
+        rh = ry + rh - newY;
+        ry = newY;
+      }
+      if (cropDragType[0] === 's') {
+        rh = Math.max(MIN, Math.min(1 - ry, rh + dy));
+      }
+      cropRect = { x: rx, y: ry, w: rw, h: rh };
+    }
+    renderCropCanvas();
+  }, { passive: false });
+
+  cropCanvas.addEventListener('touchend', () => {
+    cropDragType = null;
+  }, { passive: false });
 
   function renderCropCanvas() {
     const photo = getSelectedPhoto();

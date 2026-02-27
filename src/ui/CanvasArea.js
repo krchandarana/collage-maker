@@ -145,6 +145,73 @@ export function createCanvasArea() {
     Store.set({ hoveredCellId: null });
   });
 
+  // --- Touch events (mobile) ---
+  canvas.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    const { x, y } = canvasToLogical(t.clientX, t.clientY);
+    const cell = hitTestCell(x, y);
+
+    if (cell && cell.photoId) {
+      Store.set({ selectedCellId: cell.id });
+      isPanning = true;
+      panStartX = t.clientX;
+      panStartY = t.clientY;
+      const photo = Store.getState().photos.find((p) => p.id === cell.photoId);
+      panPhotoStartX = photo?.cropOffsetX || 0;
+      panPhotoStartY = photo?.cropOffsetY || 0;
+      dragStartCell = cell;
+    } else {
+      Store.set({ selectedCellId: null });
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (e) => {
+    if (!isPanning || !dragStartCell || e.touches.length !== 1) return;
+    e.preventDefault();
+    const t = e.touches[0];
+    const dx = t.clientX - panStartX;
+    const dy = t.clientY - panStartY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist > 30 && !isDragging) {
+      isDragging = true;
+    }
+
+    if (!isDragging) {
+      const { scaleX, scaleY } = getCanvasTransform();
+      const sensitivity = 0.003;
+      const offsetX = Math.max(-1, Math.min(1, panPhotoStartX - dx * sensitivity * scaleX));
+      const offsetY = Math.max(-1, Math.min(1, panPhotoStartY - dy * sensitivity * scaleY));
+      const photos = Store.getState().photos.map((p) =>
+        p.id === dragStartCell.photoId ? { ...p, cropOffsetX: offsetX, cropOffsetY: offsetY } : p
+      );
+      Store.set({ photos });
+    } else {
+      const { x, y } = canvasToLogical(t.clientX, t.clientY);
+      const targetCell = hitTestCell(x, y);
+      Store.set({
+        hoveredCellId: targetCell && targetCell.id !== dragStartCell.id ? targetCell.id : null,
+      });
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', (e) => {
+    if (isPanning && isDragging && dragStartCell && e.changedTouches.length > 0) {
+      const t = e.changedTouches[0];
+      const { x, y } = canvasToLogical(t.clientX, t.clientY);
+      const targetCell = hitTestCell(x, y);
+      if (targetCell && targetCell.id !== dragStartCell.id) {
+        swapCellPhotos(dragStartCell.id, targetCell.id);
+      }
+    }
+    isPanning = false;
+    isDragging = false;
+    dragStartCell = null;
+    Store.set({ hoveredCellId: null });
+  }, { passive: false });
+
   // Scroll to zoom within cell
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
