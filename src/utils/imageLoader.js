@@ -35,6 +35,10 @@ async function processFile(file) {
       cropOffsetY: 0,
       cropZoom: 1,
       rotation: 0,
+      cropX: 0,
+      cropY: 0,
+      cropW: 1,
+      cropH: 1,
     };
   } catch (e) {
     console.error('Failed to load image:', file.name, e);
