@@ -80,7 +80,7 @@ export function createPhotoEditor() {
 
   const panel = h('div', { class: 'photo-editor-panel' },
     closeBtn,
-    h('h3', { class: 'sidebar-heading', style: { marginBottom: '8px' } }, 'Edit Photo'),
+    h('h3', { class: 'sidebar-heading', style: { marginBottom: '4px' } }, 'Edit Photo'),
     fileName,
     h('div', { class: 'photo-editor-preview-wrapper' }, previewCanvas),
 
@@ -111,6 +111,16 @@ export function createPhotoEditor() {
 
     resetBtn,
   );
+
+  // Modal overlay (backdrop)
+  const overlay = h('div', { class: 'photo-editor-overlay' }, panel);
+
+  // Close on backdrop click
+  overlay.addEventListener('mousedown', (e) => {
+    if (e.target === overlay) {
+      Store.set({ selectedCellId: null });
+    }
+  });
 
   // --- Preview drag-to-pan ---
   let isPanning = false;
@@ -194,8 +204,8 @@ export function createPhotoEditor() {
     const bitmap = ImageCache.get(photo.id);
     if (!bitmap) return;
 
-    const maxW = previewCanvas.parentElement?.clientWidth || 280;
-    const maxH = 200;
+    const maxW = previewCanvas.parentElement?.clientWidth || 430;
+    const maxH = 320;
 
     // Size preview to photo aspect ratio
     const aspect = bitmap.width / bitmap.height;
@@ -236,7 +246,7 @@ export function createPhotoEditor() {
     const hasPhoto = cell && cell.photoId;
 
     if (hasPhoto) {
-      panel.classList.add('visible');
+      overlay.classList.add('visible');
       const photo = state.photos.find((p) => p.id === cell.photoId);
       const key = photo ? `${photo.id}-${photo.rotation}-${photo.cropZoom}-${photo.cropOffsetX}-${photo.cropOffsetY}` : '';
 
@@ -251,7 +261,7 @@ export function createPhotoEditor() {
         renderPreview();
       }
     } else {
-      panel.classList.remove('visible');
+      overlay.classList.remove('visible');
       prevSelectedCell = null;
       prevPhotoKey = '';
     }
@@ -259,7 +269,7 @@ export function createPhotoEditor() {
 
   Store.subscribe(onStateChange);
 
-  return { panel };
+  return { panel: overlay };
 }
 
 function rotateSvg(dir) {

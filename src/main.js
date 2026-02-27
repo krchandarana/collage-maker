@@ -37,7 +37,6 @@ function init() {
   const main = document.createElement('div');
   main.className = 'main-area';
   main.appendChild(sidebar);
-  canvasArea.appendChild(photoEditor);
   main.appendChild(canvasArea);
 
   app.appendChild(toolbar);
@@ -45,6 +44,7 @@ function init() {
   app.appendChild(photoStrip);
   app.appendChild(dropZone);
   app.appendChild(exportOverlay);
+  app.appendChild(photoEditor);
 
   // Compute initial layout
   const cells = computeLayout(Store.getState());
