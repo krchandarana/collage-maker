@@ -15,6 +15,7 @@ export function createExportDialog() {
       format = 'png';
       pngBtn.classList.add('active');
       jpegBtn.classList.remove('active');
+      pdfBtn.classList.remove('active');
       qualityRow.style.display = 'none';
     },
   }, 'PNG');
@@ -25,9 +26,21 @@ export function createExportDialog() {
       format = 'jpeg';
       jpegBtn.classList.add('active');
       pngBtn.classList.remove('active');
+      pdfBtn.classList.remove('active');
       qualityRow.style.display = 'flex';
     },
   }, 'JPEG');
+
+  const pdfBtn = h('button', {
+    class: 'sidebar-btn',
+    onClick: () => {
+      format = 'pdf';
+      pdfBtn.classList.add('active');
+      pngBtn.classList.remove('active');
+      jpegBtn.classList.remove('active');
+      qualityRow.style.display = 'none';
+    },
+  }, 'PDF');
 
   const qualitySlider = h('input', {
     type: 'range',
@@ -115,7 +128,7 @@ export function createExportDialog() {
     h('div', { style: { marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' } },
       h('div', { class: 'sidebar-section' },
         h('h3', { class: 'sidebar-heading' }, 'Format'),
-        h('div', { class: 'sidebar-btn-group' }, pngBtn, jpegBtn),
+        h('div', { class: 'sidebar-btn-group' }, pngBtn, jpegBtn, pdfBtn),
       ),
       qualityRow,
       progressBar,

@@ -1,3 +1,4 @@
+import { jsPDF } from 'jspdf';
 import { Store } from '../core/Store.js';
 import { ImageCache } from './ImageCache.js';
 import { downloadBlob } from '../utils/download.js';
@@ -7,7 +8,7 @@ import { drawPhoto } from './drawPhoto.js';
 /**
  * Export the collage at full print resolution.
  * @param {Object} opts
- * @param {'png'|'jpeg'} opts.format
+ * @param {'png'|'jpeg'|'pdf'} opts.format
  * @param {number} opts.quality - JPEG quality 0-1
  * @param {(progress: number) => void} [opts.onProgress]
  * @returns {Promise<void>}
@@ -76,11 +77,23 @@ export async function exportCollage({ format = 'png', quality = 0.92, onProgress
     ctx.restore();
   }
 
+  const sizeLabel = paper ? paper.label.replace(' ', '-') : `${exportW}x${exportH}`;
+
+  if (format === 'pdf') {
+    const widthMM = paper ? paper.widthMM : exportW * 25.4 / 300;
+    const heightMM = paper ? paper.heightMM : exportH * 25.4 / 300;
+    const orientation = widthMM > heightMM ? 'landscape' : 'portrait';
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const doc = new jsPDF({ orientation, unit: 'mm', format: [widthMM, heightMM] });
+    doc.addImage(imgData, 'JPEG', 0, 0, widthMM, heightMM);
+    doc.save(`collage-${sizeLabel}-300dpi.pdf`);
+    return;
+  }
+
   // Convert to blob and download
   const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, mimeType, quality));
 
-  const sizeLabel = paper ? paper.label.replace(' ', '-') : `${exportW}x${exportH}`;
   const ext = format === 'jpeg' ? 'jpg' : 'png';
   const filename = `collage-${sizeLabel}-300dpi.${ext}`;
 
