@@ -363,7 +363,8 @@ export function createPhotoEditor() {
 
     const dpr = window.devicePixelRatio || 1;
     cropCanvas.style.width = `${imgW}px`;
-    cropCanvas.style.height = `${imgH}px`;
+    cropCanvas.style.height = '';
+    cropCanvas.style.aspectRatio = `${imgW} / ${imgH}`;
     cropCanvas.width = imgW * dpr;
     cropCanvas.height = imgH * dpr;
     cropCtx.setTransform(1, 0, 0, 1, 0, 0);
@@ -496,7 +497,8 @@ export function createPhotoEditor() {
 
     const dpr = window.devicePixelRatio || 1;
     previewCanvas.style.width = `${pw}px`;
-    previewCanvas.style.height = `${ph}px`;
+    previewCanvas.style.height = '';
+    previewCanvas.style.aspectRatio = `${pw} / ${ph}`;
     previewCanvas.width = pw * dpr;
     previewCanvas.height = ph * dpr;
 
