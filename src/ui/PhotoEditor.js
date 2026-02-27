@@ -475,20 +475,23 @@ export function createPhotoEditor() {
     const bitmap = ImageCache.get(photo.id);
     if (!bitmap) return;
 
+    // Get the cell so the preview matches the collage aspect ratio
+    const { selectedCellId, cells } = Store.getState();
+    const cell = cells.find((c) => c.id === selectedCellId);
+    if (!cell) return;
+
     const maxW = previewCanvas.parentElement?.clientWidth || 430;
     const maxH = 320;
 
-    // Use cropped aspect ratio for preview
-    const effW = (photo.cropW ?? 1) * bitmap.width;
-    const effH = (photo.cropH ?? 1) * bitmap.height;
-    const aspect = effW / effH;
+    // Use the cell's aspect ratio to match the main collage
+    const cellAspect = cell.width / cell.height;
     let pw, ph;
-    if (aspect > maxW / maxH) {
+    if (cellAspect > maxW / maxH) {
       pw = maxW;
-      ph = maxW / aspect;
+      ph = maxW / cellAspect;
     } else {
       ph = maxH;
-      pw = maxH * aspect;
+      pw = maxH * cellAspect;
     }
 
     const dpr = window.devicePixelRatio || 1;
@@ -503,7 +506,8 @@ export function createPhotoEditor() {
     previewCtx.fillStyle = '#e2e8f0';
     previewCtx.fillRect(0, 0, pw, ph);
 
-    drawPhoto(previewCtx, bitmap, photo, 0, 0, pw, ph, bitmap.width, bitmap.height);
+    // Pass cell dimensions so cover-fit matches the main collage exactly
+    drawPhoto(previewCtx, bitmap, photo, 0, 0, pw, ph, cell.width, cell.height);
   }
 
   // =============================================
